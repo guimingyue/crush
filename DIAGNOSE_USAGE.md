@@ -1,124 +1,87 @@
-# Diagnose Tool Usage Guide
+# AI Diagnostic Tool Usage Guide
 
-The Diagnose tool is a multi-language diagnostic framework that can identify and help resolve online application issues including OutOfMemoryError, high CPU usage, and other performance problems.
+The AI Diagnostic tool is an intelligent system integrated into the crush application that uses AI to identify and help resolve online application issues including OutOfMemoryError, high CPU usage, and other performance problems.
 
 ## Overview
 
-The diagnose framework is designed to be extensible and support multiple programming languages. Currently, it includes support for Java applications with plans to expand to Go, C++, Rust, and other languages.
+The AI diagnostic tool leverages the LLM (Large Language Model) to analyze issue descriptions and automatically execute appropriate diagnostic tools. It follows the vibe coding pattern where users describe their issues and the AI determines and executes the appropriate diagnostic steps.
 
 ## Installation
 
-The diagnose tool is integrated into the `crush` CLI. Simply build the project:
+The AI diagnostic tool is integrated into the `crush` CLI. Simply build the project:
 
 ```bash
 cd /path/to/crush
 go build -o crush .
 ```
 
-## Commands
+## Usage
 
-### Basic Usage
+### Interactive Mode (Recommended)
+
+The AI diagnostic tool is available through the interactive mode of crush:
 
 ```bash
-# List all diagnosable processes
-./crush java-diag
+# Start crush in interactive mode
+./crush
 
-# Diagnose a specific process by PID
-./crush java-diag --pid <PID>
-
-# Diagnose all Java processes
-./crush java-diag --all
-
-# Show only OOM-related diagnostics
-./crush java-diag --oom-only
-
-# Show only CPU-related diagnostics
-./crush java-diag --cpu-only
+# In the interactive mode, describe your issue:
+# "My application is running slowly and seems to be using too much memory"
+# The AI will analyze the issue and execute appropriate diagnostic tools
 ```
 
-### Command Options
+### Programmatic Access
 
-| Option | Description |
-|--------|-------------|
-| `--pid <PID>` | Diagnose a specific process by its Process ID |
-| `--all` | Diagnose all running Java processes |
-| `--oom-only` | Show only OutOfMemoryError related diagnostics |
-| `--cpu-only` | Show only high CPU usage related diagnostics |
-| `-h`, `--help` | Show help information |
+The AI diagnostic functionality is also available programmatically through the app:
 
-## Supported Languages
+```go
+app := // your app instance
+ctx := context.Background()
 
-### Java Diagnostics
-
-The Java diagnoser can detect:
-
-#### Memory Issues
-- **OOM (OutOfMemoryError)**: Detects when memory usage approaches critical levels
-- **High memory consumption**: Identifies processes using excessive memory
-
-#### CPU Issues
-- **High CPU usage**: Flags processes consuming >80% CPU consistently
-- **Performance bottlenecks**: Identifies processes causing system slowdown
-
-#### Thread Issues
-- **Stuck threads**: Detects blocked or deadlocked threads
-- **Thread contention**: Identifies excessive thread synchronization issues
-
-#### Garbage Collection Issues
-- **Frequent GC**: Detects excessive garbage collection activity
-- **Full GC problems**: Identifies problematic full garbage collection cycles
-
-## Output Format
-
-The diagnostic output includes:
-
-```
-=== DIAGNOSTIC RESULT FOR PID <PID> ===
-Name: <process name>
-Type: <language type>
-Timestamp: <timestamp>
-CPU Usage: <percentage>%
-Memory Used: <amount>
-Memory Max: <amount>
-Potential OOM: <true/false>
-High CPU Usage: <true/false>
-Stuck Threads Detected: <true/false>
-Frequent GC Activity: <true/false>
-Full GC Issues: <true/false>
-
-Issues Found:
-  [<severity>] <issue-type>: <description>
-      Suggestion: <recommendation>
-
-Recommendation: <specific action to take>
+// Describe the issue to the AI diagnostic tool
+err := app.RunAIDiagnostic(ctx, "Application is experiencing high memory usage and slow performance")
+if err != nil {
+    log.Printf("Error running AI diagnostic: %v", err)
+}
 ```
 
-## Exit Codes
+## Supported Diagnostics
 
-- `0`: Success - diagnostics completed
-- `1`: Error - failed to diagnose process or invalid parameters
+The AI diagnostic tool can automatically detect and analyze:
 
-## Troubleshooting
+### Java Application Issues
+- **Memory Issues**: OutOfMemoryError, high memory consumption
+- **CPU Issues**: High CPU usage, performance bottlenecks
+- **Thread Issues**: Stuck threads, deadlocks, thread contention
+- **Garbage Collection Issues**: Frequent GC, full GC problems
 
-### Common Issues
+### Multi-Language Support
+- **Java**: Full diagnostic support
+- **Go, C++, Rust, etc.**: Planned expansion through the extensible framework
 
-1. **"Process not found"**: The process may have terminated or the PID is incorrect
-2. **Permission denied**: The tool may not have sufficient permissions to access process information
-3. **No Java processes found**: No Java applications are currently running
+## How It Works
 
-### Required Tools
+1. **Issue Description**: User describes the problem in natural language
+2. **AI Analysis**: The LLM analyzes the description to determine likely causes
+3. **Tool Selection**: AI selects appropriate diagnostic tools to run
+4. **Execution**: Diagnostic tools are executed automatically
+5. **Analysis**: Results are analyzed by the AI
+6. **Recommendations**: AI provides specific recommendations to resolve the issue
 
-The Java diagnoser requires these tools to be available in the system PATH:
-- `jstack` - for thread dump analysis
-- `jstat` - for garbage collection statistics
-- `jmap` - for heap dump generation
-- `ps` - for process information
+## Integration with Vibe Coding
+
+The AI diagnostic tool follows the vibe coding pattern:
+- Users describe their issue in natural language
+- The AI determines what diagnostic tools to run
+- Tools are executed automatically
+- Results are analyzed and presented to the user
+- Specific recommendations are provided
 
 ## Extending the Framework
 
 To add support for additional languages:
 
-1. Create a new diagnoser that implements the `Diagnoser` interface
+1. Create a new diagnoser that implements the `Diagnoser` interface in `internal/diagnose`
 2. Register it with the `Manager` using `Register(diagnoser)`
 3. Implement the required methods:
    - `IdentifyProcess(pid int)` - Determine if process is of this language type
@@ -126,29 +89,36 @@ To add support for additional languages:
    - `Diagnose(pid int)` - Perform full diagnostic
    - `GetName()` - Return the language name
 
+The AI will automatically incorporate new diagnosers into its analysis.
+
 ## Examples
 
-### List all Java processes:
-```bash
-./crush java-diag
+### In Interactive Mode:
+```
+> My Java application is running slowly and consuming too much memory
+[AI analyzes the issue and runs appropriate diagnostic tools...]
+[Results and recommendations are displayed]
 ```
 
-### Diagnose a specific Java application:
-```bash
-./crush java-diag --pid 12345
+### Programmatic Usage:
+```go
+// Run AI-guided diagnostics
+err := app.RunAIDiagnostic(ctx, "Application is experiencing high memory usage")
+if err != nil {
+    // Handle error
+}
 ```
 
-### Focus on memory issues:
-```bash
-./crush java-diag --pid 12345 --oom-only
-```
+## Troubleshooting
 
-### Focus on CPU issues:
-```bash
-./crush java-diag --pid 12345 --cpu-only
-```
+### Common Issues
 
-### Diagnose all Java applications:
-```bash
-./crush java-diag --all
-```
+1. **AI doesn't recognize the issue**: Provide more specific details about the problem
+2. **Diagnostic tools fail**: Ensure required system tools are available (jstack, jstat, etc.)
+3. **No processes found**: Verify that target applications are running
+
+### Required Tools
+
+Depending on the target applications, the following tools may be required:
+- Java applications: `jstack`, `jstat`, `jmap`, `ps`
+- Other languages: Language-specific diagnostic tools
