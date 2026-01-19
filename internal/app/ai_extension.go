@@ -7,6 +7,16 @@ import (
 	"github.com/charmbracelet/crush/internal/message"
 )
 
+// RunDiagnosticWithAI runs a diagnostic and enhances it with AI analysis
+func (app *App) RunDiagnosticWithAI(ctx context.Context, pid int) (string, error) {
+	// This would integrate with the diagnose package to run diagnostics
+	// and then enhance with AI analysis
+
+	// For now, this is a placeholder that would connect the diagnostic
+	// results with the AI enhancement
+	return "", nil
+}
+
 // AskLLM sends a prompt to the LLM service and returns the response
 func (app *App) AskLLM(ctx context.Context, prompt string) (string, error) {
 	if app.AgentCoordinator == nil {
@@ -48,14 +58,4 @@ func (app *App) AskLLM(ctx context.Context, prompt string) (string, error) {
 	}
 
 	return response, nil
-}
-
-// RunDiagnosticWithAI runs a diagnostic and enhances it with AI analysis
-func (app *App) RunDiagnosticWithAI(ctx context.Context, pid int) (string, error) {
-	// This would integrate with the diagnose package to run diagnostics
-	// and then enhance with AI analysis
-
-	// For now, this is a placeholder that would connect the diagnostic
-	// results with the AI enhancement
-	return "", nil
 }
