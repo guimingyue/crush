@@ -18,17 +18,27 @@ type JavaProcess struct {
 // Diagnostics is the main struct for performing Java diagnostics
 type Diagnostics struct {
 	timeout time.Duration
+	config  *JavaToolsConfig
 }
 
 var _ Diagnoser = (*Diagnostics)(nil) // Ensure Diagnostics implements Diagnoser interface
 
 // New creates a new Diagnostics instance
 func New(timeout time.Duration) *Diagnostics {
+	return NewWithConfig(timeout, GetDefaultJavaToolsConfig())
+}
+
+// NewWithConfig creates a new Diagnostics instance with custom Java tools configuration
+func NewWithConfig(timeout time.Duration, config *JavaToolsConfig) *Diagnostics {
 	if timeout == 0 {
 		timeout = 10 * time.Second
 	}
+	if config == nil {
+		config = GetDefaultJavaToolsConfig()
+	}
 	return &Diagnostics{
 		timeout: timeout,
+		config:  config,
 	}
 }
 
@@ -361,7 +371,7 @@ func (d *Diagnostics) getThreadDump(pid int) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "jstack", strconv.Itoa(pid))
+	cmd := exec.CommandContext(ctx, d.config.JStackPath, strconv.Itoa(pid))
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get thread dump: %w", err)
@@ -411,7 +421,7 @@ func (d *Diagnostics) getGCActivity(pid int) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "jstat", "-gc", strconv.Itoa(pid))
+	cmd := exec.CommandContext(ctx, d.config.JStatPath, "-gc", strconv.Itoa(pid))
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get GC statistics: %w", err)
@@ -466,8 +476,8 @@ func (d *Diagnostics) GenerateHeapDump(pid int) (string, error) {
 	defer cancel()
 
 	heapDumpPath := fmt.Sprintf("/tmp/java_heap_%d.hprof", pid)
-	cmd := exec.CommandContext(ctx, "jmap", "-dump:format=b,file="+heapDumpPath, strconv.Itoa(pid))
-	
+	cmd := exec.CommandContext(ctx, d.config.JMapPath, "-dump:format=b,file="+heapDumpPath, strconv.Itoa(pid))
+
 	err := cmd.Run()
 	if err != nil {
 		return "", fmt.Errorf("failed to generate heap dump: %w", err)
@@ -481,7 +491,7 @@ func (d *Diagnostics) GetJVMInfo(pid int) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "jinfo", "-flags", strconv.Itoa(pid))
+	cmd := exec.CommandContext(ctx, d.config.JInfoPath, "-flags", strconv.Itoa(pid))
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get JVM info: %w", err)

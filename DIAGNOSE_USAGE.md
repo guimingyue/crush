@@ -116,9 +116,39 @@ if err != nil {
 1. **AI doesn't recognize the issue**: Provide more specific details about the problem
 2. **Diagnostic tools fail**: Ensure required system tools are available (jstack, jstat, etc.)
 3. **No processes found**: Verify that target applications are running
+4. **Java tools not found**: Configure JAVA_HOME or ensure JDK tools are in PATH
 
 ### Required Tools
 
-Depending on the target applications, the following tools may be required:
-- Java applications: `jstack`, `jstat`, `jmap`, `ps`
+#### Java Applications
+The following Java diagnostic tools are required for full functionality:
+- `jstack` - for thread dump analysis
+- `jstat` - for garbage collection statistics
+- `jmap` - for heap dump generation
+- `jps` - for process listing
+- `jinfo` - for JVM configuration info
+
+#### Configuration
+The diagnostic tool will automatically look for Java tools in these locations:
+1. `JAVA_HOME` environment variable
+2. Standard system PATH
+3. Common installation directories
+
+If tools are installed in a non-standard location, ensure `JAVA_HOME` is set correctly:
+```bash
+export JAVA_HOME=/path/to/your/java/installation
+export PATH=$PATH:$JAVA_HOME/bin
+```
+
+#### Verification
+Verify that Java diagnostic tools are accessible:
+```bash
+which jstat
+which jmap
+which jstack
+java -version
+echo $JAVA_HOME
+```
+
+### Other Languages
 - Other languages: Language-specific diagnostic tools

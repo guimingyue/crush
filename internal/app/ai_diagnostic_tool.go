@@ -26,7 +26,16 @@ func NewAIDiagnosticTool(appInstance *App) *AIDiagnosticTool {
 // DiagnoseIssue takes an issue description and performs AI-guided diagnostics
 func (aidt *AIDiagnosticTool) DiagnoseIssue(ctx context.Context, issueDescription string) error {
 	// First, register available diagnosers
-	javaDiag := diagnose.New(10 * time.Second)
+	javaToolsConfig := diagnose.GetDefaultJavaToolsConfig()
+
+	// Validate that required tools are available
+	missingTools := javaToolsConfig.Validate()
+	if len(missingTools) > 0 {
+		fmt.Printf("⚠️  Warning: Some Java diagnostic tools are not available: %s\n", strings.Join(missingTools, ", "))
+		fmt.Println("Please ensure Java Development Kit (JDK) is installed and tools are in PATH or JAVA_HOME is set.")
+	}
+
+	javaDiag := diagnose.NewWithConfig(10 * time.Second, javaToolsConfig)
 	aidt.diagManager.Register(javaDiag)
 
 	// Prepare diagnostic context
