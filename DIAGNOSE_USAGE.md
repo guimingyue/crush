@@ -77,6 +77,40 @@ The AI diagnostic tool follows the vibe coding pattern:
 - Results are analyzed and presented to the user
 - Specific recommendations are provided
 
+## Java Tools Configuration
+
+The diagnostic tool supports configurable paths for Java diagnostic commands to work with different Java installations:
+
+### Automatic Detection
+The tool automatically searches for Java diagnostic tools in:
+1. `JAVA_HOME` environment variable
+2. Standard system PATH
+3. Common installation directories
+
+### Manual Configuration
+If tools are installed in a non-standard location, ensure `JAVA_HOME` is set correctly:
+```bash
+export JAVA_HOME=/path/to/your/java/installation
+export PATH=$PATH:$JAVA_HOME/bin
+```
+
+### Supported Java Diagnostic Tools
+- `jstat` - JVM statistics monitoring tool
+- `jmap` - Memory mapping tool
+- `jstack` - Stack trace tool
+- `jps` - JVM process status tool
+- `jinfo` - Configuration information tool
+
+### Verification
+Verify that Java diagnostic tools are accessible:
+```bash
+which jstat
+which jmap
+which jstack
+java -version
+echo $JAVA_HOME
+```
+
 ## Extending the Framework
 
 To add support for additional languages:
@@ -118,36 +152,29 @@ if err != nil {
 3. **No processes found**: Verify that target applications are running
 4. **Java tools not found**: Configure JAVA_HOME or ensure JDK tools are in PATH
 
-### Required Tools
+#### Java Tools Not Found
+If Java diagnostic tools are not found:
 
-#### Java Applications
-The following Java diagnostic tools are required for full functionality:
-- `jstack` - for thread dump analysis
-- `jstat` - for garbage collection statistics
-- `jmap` - for heap dump generation
-- `jps` - for process listing
-- `jinfo` - for JVM configuration info
+1. **Check Java Installation**: Ensure JDK (not just JRE) is installed
+2. **Set JAVA_HOME**: Point to your JDK installation directory
+3. **Add to PATH**: Ensure Java tools are in your system PATH
+4. **Verify Tools**: Check that individual tools are accessible
 
-#### Configuration
-The diagnostic tool will automatically look for Java tools in these locations:
-1. `JAVA_HOME` environment variable
-2. Standard system PATH
-3. Common installation directories
-
-If tools are installed in a non-standard location, ensure `JAVA_HOME` is set correctly:
+#### Verification Commands:
 ```bash
-export JAVA_HOME=/path/to/your/java/installation
-export PATH=$PATH:$JAVA_HOME/bin
-```
-
-#### Verification
-Verify that Java diagnostic tools are accessible:
-```bash
-which jstat
-which jmap
-which jstack
+# Check Java installation
 java -version
+
+# Check JAVA_HOME
 echo $JAVA_HOME
+
+# Check individual tools
+which jstat jmap jstack jps jinfo
+
+# If tools are not found, install JDK:
+# Ubuntu/Debian: sudo apt-get install openjdk-11-jdk
+# CentOS/RHEL: sudo yum install java-11-openjdk-devel
+# macOS: brew install openjdk
 ```
 
 ### Other Languages
