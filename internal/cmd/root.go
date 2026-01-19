@@ -46,7 +46,6 @@ func init() {
 		logsCmd,
 		schemaCmd,
 		loginCmd,
-		javaDiagCmd,
 	)
 }
 
