@@ -398,6 +398,7 @@ func (c *coordinator) buildTools(ctx context.Context, agent config.Agent) ([]fan
 		tools.NewTodosTool(c.sessions),
 		tools.NewViewTool(c.lspClients, c.permissions, c.cfg.WorkingDir(), c.cfg.Options.SkillsPaths...),
 		tools.NewWriteTool(c.lspClients, c.permissions, c.history, c.cfg.WorkingDir()),
+		tools.NewAppDiagnosticsTool(),
 	)
 
 	if len(c.cfg.LSP) > 0 {

@@ -1,0 +1,1 @@
+Diagnose application issues including OutOfMemoryError, high CPU usage, and other performance problems. This tool can analyze running processes and provide detailed diagnostic information.

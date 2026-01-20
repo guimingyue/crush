@@ -443,12 +443,6 @@ func (app *App) Shutdown() {
 	wg.Wait()
 }
 
-// RunAIDiagnostic runs an AI-guided diagnostic based on issue description
-func (app *App) RunAIDiagnostic(ctx context.Context, issueDescription string) error {
-	tool := NewAIDiagnosticTool(app)
-	return tool.DiagnoseIssue(ctx, issueDescription)
-}
-
 // checkForUpdates checks for available updates.
 func (app *App) checkForUpdates(ctx context.Context) {
 	checkCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
