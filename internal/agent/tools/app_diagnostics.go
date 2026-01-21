@@ -33,11 +33,11 @@ func NewAppDiagnosticsTool() fantasy.AgentTool {
 func runAppDiagnostics(ctx context.Context, params AppDiagnosticsParams) (fantasy.ToolResponse, error) {
 	// Create a diagnostic manager
 	manager := diagnose.NewManager()
-	
+
 	// Create Java diagnoser with default configuration
 	javaDiag := diagnose.New(10*time.Second)
 	manager.Register(javaDiag)
-	
+
 	var result strings.Builder
 
 	if params.ProcessID > 0 {
@@ -48,6 +48,27 @@ func runAppDiagnostics(ctx context.Context, params AppDiagnosticsParams) (fantas
 		}
 
 		result.WriteString(formatDiagnosticResult(diagResult))
+
+		// Add additional system-level diagnostics
+		result.WriteString("\nAdditional System Information:\n")
+
+		// Get system process info
+		sysInfo, err := javaDiag.GetSystemProcessInfo(params.ProcessID)
+		if err == nil && sysInfo != "" {
+			result.WriteString(fmt.Sprintf("Process Details:\n%s\n", sysInfo))
+		}
+
+		// Get open files (if available)
+		openFiles, err := javaDiag.GetOpenFiles(params.ProcessID)
+		if err == nil && openFiles != "" && !strings.Contains(openFiles, "lsof not available") {
+			result.WriteString(fmt.Sprintf("Open Files:\n%s\n", openFiles))
+		}
+
+		// Get network connections (if available)
+		netConns, err := javaDiag.GetNetworkConnections(params.ProcessID)
+		if err == nil && netConns != "" && !strings.Contains(netConns, "lsof not available") {
+			result.WriteString(fmt.Sprintf("Network Connections:\n%s\n", netConns))
+		}
 	} else {
 		// Diagnose all processes
 		processes, err := manager.GetAllProcesses()
@@ -73,6 +94,12 @@ func runAppDiagnostics(ctx context.Context, params AppDiagnosticsParams) (fantas
 
 				result.WriteString("  Diagnostics:\n")
 				result.WriteString(indentText(formatDiagnosticResult(diagResult), "    "))
+
+				// Add additional system-level diagnostics for each process
+				sysInfo, err := javaDiag.GetSystemProcessInfo(process.PID)
+				if err == nil && sysInfo != "" {
+					result.WriteString(indentText(fmt.Sprintf("  Process Details:\n%s", sysInfo), "    "))
+				}
 			}
 		}
 	}
@@ -82,7 +109,7 @@ func runAppDiagnostics(ctx context.Context, params AppDiagnosticsParams) (fantas
 
 func formatDiagnosticResult(result *diagnose.DiagnosticResult) string {
 	var output strings.Builder
-	
+
 	fmt.Fprintf(&output, "Process: %s (PID: %d)\n", result.Process.Name, result.Process.PID)
 	fmt.Fprintf(&output, "Type: %s\n", result.Process.Type)
 	fmt.Fprintf(&output, "CPU Usage: %.2f%%\n", result.Process.CPUUsage)
@@ -93,15 +120,21 @@ func formatDiagnosticResult(result *diagnose.DiagnosticResult) string {
 	fmt.Fprintf(&output, "Stuck Threads: %t\n", result.IsStuckThread)
 	fmt.Fprintf(&output, "Frequent GC: %t\n", result.HasFrequentGC)
 	fmt.Fprintf(&output, "Full GC Issues: %t\n", result.HasFullGCIssues)
-	
+
+	if result.GCActivity != "" {
+		output.WriteString("GC Activity:\n")
+		output.WriteString(result.GCActivity)
+		output.WriteString("\n")
+	}
+
 	if len(result.Issues) > 0 {
 		output.WriteString("Issues Found:\n")
 		for _, issue := range result.Issues {
-			fmt.Fprintf(&output, "  - [%s] %s: %s\n    Suggestion: %s\n", 
+			fmt.Fprintf(&output, "  - [%s] %s: %s\n    Suggestion: %s\n",
 				issue.Severity, issue.Type, issue.Description, issue.Suggestion)
 		}
 	}
-	
+
 	return output.String()
 }
 

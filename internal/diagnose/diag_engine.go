@@ -432,22 +432,47 @@ func (d *Diagnostics) analyzeGCActivity(gcStats string) (frequentGC bool, fullGC
 	fields := strings.Fields(dataLine)
 
 	if len(fields) < 8 {
-		// Expected fields: S0C, S1C, S0U, S1U, EC, EU, OC, OU, MC, MU, CCSC, CCSU, YGC, YGCT, FGC, FGCT, GCT
+		// Handle minimal output case
+		if len(fields) >= 2 {
+			// At minimum, we need YGC (young GC count) and FGC (full GC count)
+			youngGCCount, _ := parseFloatOrZero(fields[0]) // Assuming first field might be YGC in some cases
+			fullGCCount, _ := parseFloatOrZero(fields[1]) // Assuming second field might be FGC in some cases
+
+			// Check for frequent GC activity (potential memory pressure)
+			frequentGC = youngGCCount > 100 // More than 100 young GCs might indicate issues
+
+			// Check for full GC issues (long pauses, too frequent)
+			fullGCIssues = fullGCCount > 5 // More than 5 full GCs might indicate problems
+
+			return frequentGC, fullGCIssues
+		}
 		return false, false
 	}
 
-	// Parse key GC metrics
-	youngGCCount, _ := parseFloatOrZero(fields[12]) // YGC - Young GC count
-	_, _ = parseFloatOrZero(fields[13]) // YGCT - Young GC time
-	fullGCCount, _ := parseFloatOrZero(fields[14]) // FGC - Full GC count
-	_, _ = parseFloatOrZero(fields[15]) // FGCT - Full GC time
+	// Expected fields: S0C, S1C, S0U, S1U, EC, EU, OC, OU, MC, MU, CCSC, CCSU, YGC, YGCT, FGC, FGCT, GCT
+	// Indexes:  0    1    2    3    4   5   6   7   8   9   10    11   12   13    14   15    16
+	var youngGCCount, fullGCCount, fullGCTime float64
+
+	if len(fields) > 12 {
+		youngGCCount, _ = parseFloatOrZero(fields[12]) // YGC - Young GC count
+	}
+	if len(fields) > 13 {
+		_, _ = parseFloatOrZero(fields[13]) // YGCT - Young GC time (currently unused but available for future use)
+	}
+	if len(fields) > 14 {
+		fullGCCount, _ = parseFloatOrZero(fields[14]) // FGC - Full GC count
+	}
+	if len(fields) > 15 {
+		fullGCTime, _ = parseFloatOrZero(fields[15]) // FGCT - Full GC time
+	}
 
 	// Check for frequent GC activity (potential memory pressure)
 	// If young GCs are happening very frequently, it might indicate memory pressure
 	frequentGC = youngGCCount > 100 // More than 100 young GCs might indicate issues
 
 	// Check for full GC issues (long pauses, too frequent)
-	fullGCIssues = fullGCCount > 5 // More than 5 full GCs might indicate problems
+	// More than 5 full GCs OR full GC time > 1 second might indicate problems
+	fullGCIssues = fullGCCount > 5 || fullGCTime > 1.0
 
 	return frequentGC, fullGCIssues
 }
@@ -485,6 +510,51 @@ func (d *Diagnostics) GetJVMInfo(pid int) (string, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get JVM info: %w", err)
+	}
+
+	return string(output), nil
+}
+
+// GetSystemProcessInfo gets detailed system-level information for the process
+func (d *Diagnostics) GetSystemProcessInfo(pid int) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+	defer cancel()
+
+	// Use ps to get detailed process information
+	cmd := exec.CommandContext(ctx, "ps", "-p", strconv.Itoa(pid), "-o", "pid,ppid,cmd,%cpu,%mem,vsz,rss,stat,wchan:50,etime,pcpu,pmem", "--no-headers")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get system process info: %w", err)
+	}
+
+	return string(output), nil
+}
+
+// GetOpenFiles gets information about files opened by the process
+func (d *Diagnostics) GetOpenFiles(pid int) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "lsof", "-p", strconv.Itoa(pid))
+	output, err := cmd.Output()
+	if err != nil {
+		// lsof might not be available on all systems, so return a warning
+		return fmt.Sprintf("lsof not available or failed: %v", err), nil
+	}
+
+	return string(output), nil
+}
+
+// GetNetworkConnections gets network connections for the process
+func (d *Diagnostics) GetNetworkConnections(pid int) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "lsof", "-i", "-p", strconv.Itoa(pid))
+	output, err := cmd.Output()
+	if err != nil {
+		// lsof might not be available on all systems, so return a warning
+		return fmt.Sprintf("lsof network check not available or failed: %v", err), nil
 	}
 
 	return string(output), nil
