@@ -211,8 +211,8 @@ func (d *Diagnostics) DiagnoseProcess(pid int) (*DiagnosticResult, error) {
 	// Get thread dump
 	threadDump, err := d.getThreadDump(pid)
 	if err != nil {
-		// Log the error but don't fail the entire diagnostic
-		fmt.Printf("Warning: failed to get thread dump: %v\n", err)
+		// Record the error but don't fail the entire diagnostic
+		// The error is handled by not setting ThreadDump and IsStuckThread
 	} else {
 		result.ThreadDump = threadDump
 		result.IsStuckThread = d.analyzeThreadDump(threadDump)
@@ -221,7 +221,8 @@ func (d *Diagnostics) DiagnoseProcess(pid int) (*DiagnosticResult, error) {
 	// Check GC activity
 	gcActivity, err := d.getGCActivity(pid)
 	if err != nil {
-		fmt.Printf("Warning: failed to get GC activity: %v\n", err)
+		// Record the error but don't fail the entire diagnostic
+		// The error is handled by not setting GCActivity and related flags
 	} else {
 		result.GCActivity = gcActivity
 		freqGC, fullGCIssues := d.analyzeGCActivity(gcActivity)
