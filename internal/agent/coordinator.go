@@ -401,6 +401,9 @@ func (c *coordinator) buildTools(ctx context.Context, agent config.Agent) ([]fan
 		tools.NewAppDiagnosticsTool(),
 	)
 
+	// Add command-based diagnostic tools
+	allTools = append(allTools, tools.GetCommandTools()...)
+
 	if len(c.cfg.LSP) > 0 {
 		allTools = append(allTools, tools.NewDiagnosticsTool(c.lspClients), tools.NewReferencesTool(c.lspClients))
 	}
