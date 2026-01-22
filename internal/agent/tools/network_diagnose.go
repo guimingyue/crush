@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"net"
 	"os/exec"
@@ -12,6 +13,9 @@ import (
 
 	"charm.land/fantasy"
 )
+
+//go:embed network_diagnose.md
+var networkDiagnosticsDescription []byte
 
 // NetworkDiagnoseParams are parameters for the network diagnostic tool
 type NetworkDiagnoseParams struct {
@@ -28,9 +32,7 @@ const NetworkDiagnoseToolName = "network_diagnose"
 func NewNetworkDiagnoseTool() fantasy.AgentTool {
 	return fantasy.NewAgentTool(
 		NetworkDiagnoseToolName,
-		`Diagnose network issues including connectivity problems, high network usage, connection leaks, and network bottlenecks.
-This tool can analyze network activity for a specific process or general network connectivity issues.
-Use this when investigating slow network performance, connection timeouts, or network-related application issues.`,
+		string(networkDiagnosticsDescription),
 		func(ctx context.Context, params NetworkDiagnoseParams, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			return runNetworkDiagnosis(ctx, params)
 		})

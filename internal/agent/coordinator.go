@@ -400,6 +400,7 @@ func (c *coordinator) buildTools(ctx context.Context, agent config.Agent) ([]fan
 		tools.NewWriteTool(c.lspClients, c.permissions, c.history, c.cfg.WorkingDir()),
 		tools.NewAppDiagnosticsTool(),
 		tools.NewCPUThreadAnalyzerTool(), // Add CPU thread analyzer tool
+		tools.NewNetworkDiagnoseTool(),   // Add network diagnostic tool
 	)
 
 	// Add command-based diagnostic tools
