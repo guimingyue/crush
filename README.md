@@ -79,55 +79,105 @@ The AI will automatically determine which diagnostic tools to run and provide an
 - **Works Everywhere:** first-class support in every terminal on macOS, Linux, Windows (PowerShell and WSL), Android, FreeBSD, OpenBSD, and NetBSD
 - **Industrial Grade:** built on the Charm ecosystem, powering 25k+ applications, from leading open source projects to business-critical infrastructure
 
-## Installation
+## Building from Source
 
-Use a package manager:
+To build Crush from source, follow these steps:
+
+### Prerequisites
+
+1. **Go**: Install Go 1.23 or later
+   - Visit [https://golang.org/dl/](https://golang.org/dl/) to download Go
+   - Or use a package manager:
+     ```bash
+     # macOS with Homebrew
+     brew install go
+
+     # Ubuntu/Debian
+     sudo apt update && sudo apt install golang-go
+
+     # CentOS/RHEL/Fedora
+     sudo dnf install golang
+     ```
+
+2. **Git**: Install Git for cloning the repository
+   ```bash
+   # macOS with Homebrew
+   brew install git
+
+   # Ubuntu/Debian
+   sudo apt install git
+
+   # CentOS/RHEL/Fedora
+   sudo dnf install git
+   ```
+
+3. **Java Development Kit (JDK)**: Required for Java diagnostic features
+   ```bash
+   # macOS with Homebrew
+   brew install openjdk
+
+   # Ubuntu/Debian
+   sudo apt install openjdk-17-jdk
+
+   # CentOS/RHEL/Fedora
+   sudo dnf install java-17-openjdk-devel
+   ```
+
+### Build Steps
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/charmbracelet/crush.git
+   cd crush
+   ```
+
+2. **Build the Project**:
+   ```bash
+   go build -o crush .
+   ```
+
+3. **Verify the Build**:
+   ```bash
+   ./crush --version
+   ```
+
+### Alternative Installation Methods
+
+After building, you can install globally:
 
 ```bash
-# Homebrew
-brew install charmbracelet/tap/crush
+# Install to GOBIN (usually $GOPATH/bin or $HOME/go/bin)
+go install .
 
-# NPM
-npm install -g @charmland/crush
-
-# Arch Linux (btw)
-yay -S crush-bin
-
-# Nix
-nix run github:numtide/nix-ai-tools#crush
-
-# FreeBSD
-pkg install crush
+# Or copy the binary to a system directory
+sudo cp crush /usr/local/bin/
 ```
 
-Windows users:
+### Running Tests
+
+To ensure everything is working correctly, run the tests:
 
 ```bash
-# Winget
-winget install charmbracelet.crush
-
-# Scoop
-scoop bucket add charm https://github.com/charmbracelet/scoop-bucket.git
-scoop install crush
+go test ./...
 ```
 
-<details>
-<summary><strong>Nix (NUR)</strong></summary>
+### Development Setup
 
-Crush is available via the official Charm [NUR](https://github.com/nix-community/NUR) in `nur.repos.charmbracelet.crush`, which is the most up-to-date way to get Crush in Nix.
+For development, you may also want to:
 
-You can also try out Crush via the NUR with `nix-shell`:
+1. **Install additional tools**:
+   ```bash
+   go install golang.org/x/tools/cmd/goimports@latest
+   go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+   ```
 
-```bash
-# Add the NUR channel.
-nix-channel --add https://github.com/nix-community/NUR/archive/main.tar.gz nur
-nix-channel --update
-
-# Get Crush in a Nix shell.
-nix-shell -p '(import <nur> { pkgs = import <nixpkgs> {}; }).repos.charmbracelet.crush'
-```
-
-### NixOS & Home Manager Module Usage via NUR
+2. **Set up your Go environment**:
+   ```bash
+   # Ensure GOPATH and GOROOT are set
+   echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+   echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bashrc
+   source ~/.bashrc
+   ```
 
 Crush provides NixOS and Home Manager modules via NUR.
 You can use these modules directly in your flake by importing them from NUR. Since it auto detects whether its a home manager or nixos context you can use the import the exact same way :)
