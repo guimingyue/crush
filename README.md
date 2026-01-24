@@ -18,6 +18,64 @@
 - **Session-Based:** maintain multiple work sessions and contexts per project
 - **LSP-Enhanced:** Crush uses LSPs for additional context, just like you do
 - **Extensible:** add capabilities via MCPs (`http`, `stdio`, and `sse`)
+- **AI-Powered Diagnostics:** intelligent diagnostic tools for identifying and resolving application issues including OutOfMemoryError, high CPU usage, thread problems, and network issues
+
+## Diagnostic Tools
+
+Crush includes powerful AI-powered diagnostic tools for identifying and resolving application issues:
+
+### Java Diagnostic Tool
+
+The Java diagnostic tool can analyze running Java processes to identify:
+
+- **Memory Issues**: OutOfMemoryError conditions, high memory usage
+- **CPU Issues**: High CPU usage, performance bottlenecks
+- **Thread Issues**: Stuck threads, deadlocks, thread contention
+- **GC Issues**: Frequent garbage collection, full GC problems
+
+#### Usage
+
+```bash
+# List all diagnosable processes
+./crush diagnose
+
+# Diagnose a specific process by PID
+./crush diagnose --pid <PID>
+
+# Diagnose all processes
+./crush diagnose --all
+
+# Focus on memory issues only
+./crush diagnose --oom-only
+
+# Focus on CPU issues only
+./crush diagnose --cpu-only
+
+# Filter by application type
+./crush diagnose --type java
+```
+
+### Network Diagnostic Tool
+
+The network diagnostic tool can analyze network connections to identify:
+
+- **Connection Issues**: Connection leaks, stuck connections
+- **Network Performance**: High connection counts, network bottlenecks
+- **Security Issues**: Suspicious network connections
+- **Resource Issues**: Excessive network resource usage
+
+The network diagnostic functionality is integrated into the general diagnostic tool and will be automatically used by the AI when network issues are detected.
+
+### AI-Powered Diagnostics
+
+The AI agent can automatically select and run appropriate diagnostic tools based on your issue description. Simply describe your problem in natural language:
+
+```bash
+./crush
+# Then describe: "My application is running slowly and seems to be using too much memory"
+```
+
+The AI will automatically determine which diagnostic tools to run and provide analysis and recommendations.
 - **Works Everywhere:** first-class support in every terminal on macOS, Linux, Windows (PowerShell and WSL), Android, FreeBSD, OpenBSD, and NetBSD
 - **Industrial Grade:** built on the Charm ecosystem, powering 25k+ applications, from leading open source projects to business-critical infrastructure
 
