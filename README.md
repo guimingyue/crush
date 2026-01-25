@@ -179,6 +179,40 @@ For development, you may also want to:
    source ~/.bashrc
    ```
 
+## Configuration
+
+Crush can be configured with a simple YAML file or environment variables.
+
+### Simple Configuration
+
+Create a `crush.yaml` file with just the essential settings:
+
+```yaml
+model:
+  provider: "openai"      # Supported: openai, anthropic, google, ollama, groq
+  name: "gpt-4o"         # Model name (varies by provider)
+  api_key: "your-key"    # Required for cloud providers, not for local models
+  base_url: ""           # Leave empty for standard providers
+```
+
+Alternatively, use environment variables:
+
+```bash
+export CRUSH_MODEL_PROVIDER=openai
+export CRUSH_MODEL_NAME=gpt-4o
+export CRUSH_API_KEY=your-api-key-here
+```
+
+For local models using Ollama, no API key is needed:
+
+```bash
+ollama serve  # Run in another terminal
+export CRUSH_MODEL_PROVIDER=ollama
+export CRUSH_MODEL_NAME=llama3.1:8b
+```
+
+See the [full configuration guide](CONFIGURATION.md) for detailed setup instructions for different providers.
+
 Crush provides NixOS and Home Manager modules via NUR.
 You can use these modules directly in your flake by importing them from NUR. Since it auto detects whether its a home manager or nixos context you can use the import the exact same way :)
 
