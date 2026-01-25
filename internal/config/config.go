@@ -399,9 +399,86 @@ func (c *Config) EnabledProviders() []ProviderConfig {
 	return enabled
 }
 
-// IsConfigured  return true if at least one provider is configured
+// IsConfigured returns true if at least one provider is configured
 func (c *Config) IsConfigured() bool {
 	return len(c.EnabledProviders()) > 0
+}
+
+// HasPreferredModels returns true if both large and small models are set
+func (c *Config) HasPreferredModels() bool {
+	if c.Models == nil {
+		return false
+	}
+	_, hasLarge := c.Models[SelectedModelTypeLarge]
+	_, hasSmall := c.Models[SelectedModelTypeSmall]
+	return hasLarge && hasSmall
+}
+
+// SetDefaultModels sets default models based on environment variables or available providers
+func (c *Config) SetDefaultModels() error {
+	if c.Models == nil {
+		c.Models = make(map[SelectedModelType]SelectedModel)
+	}
+
+	// Check for simple configuration from environment variables first
+	provider := os.Getenv("CRUSH_MODEL_PROVIDER")
+	modelName := os.Getenv("CRUSH_MODEL_NAME")
+	apiKey := os.Getenv("CRUSH_API_KEY")
+
+	if provider != "" && modelName != "" {
+		// Set both large and small models to the same if only one is specified
+		defaultModel := SelectedModel{
+			Model:    modelName,
+			Provider: provider,
+		}
+
+		// Add API key to provider config if provided
+		if apiKey != "" {
+			if providerConfig, exists := c.Providers.Get(provider); exists {
+				providerConfig.APIKey = apiKey
+				c.Providers.Set(provider, providerConfig)
+			}
+		}
+
+		c.Models[SelectedModelTypeLarge] = defaultModel
+		c.Models[SelectedModelTypeSmall] = defaultModel // Use same model for both types for simplicity
+
+		// Persist to config file
+		if err := c.SetConfigField("models.large", defaultModel); err != nil {
+			return fmt.Errorf("failed to set large model: %w", err)
+		}
+		if err := c.SetConfigField("models.small", defaultModel); err != nil {
+			return fmt.Errorf("failed to set small model: %w", err)
+		}
+
+		return nil
+	}
+
+	// If no environment variables, try to use first available model from providers
+	for providerID, providerConfig := range c.Providers.Seq2() {
+		if !providerConfig.Disable && len(providerConfig.Models) > 0 {
+			// Use the first available model as default
+			defaultModel := SelectedModel{
+				Model:    providerConfig.Models[0].ID,
+				Provider: providerID,
+			}
+
+			c.Models[SelectedModelTypeLarge] = defaultModel
+			c.Models[SelectedModelTypeSmall] = defaultModel
+
+			// Persist to config file
+			if err := c.SetConfigField("models.large", defaultModel); err != nil {
+				return fmt.Errorf("failed to set large model: %w", err)
+			}
+			if err := c.SetConfigField("models.small", defaultModel); err != nil {
+				return fmt.Errorf("failed to set small model: %w", err)
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("no providers configured and no default models available")
 }
 
 func (c *Config) GetModel(provider, model string) *catwalk.Model {

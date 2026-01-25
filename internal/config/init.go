@@ -131,5 +131,23 @@ func HasInitialDataConfig() bool {
 	if _, err := os.Stat(cfgPath); err != nil {
 		return false
 	}
-	return Get().IsConfigured()
+
+	cfg := Get()
+
+	// Check if the configuration is set up with at least one provider
+	if !cfg.IsConfigured() {
+		return false
+	}
+
+	// Additionally check if preferred models are set
+	// If not, try to set defaults automatically
+	if !cfg.HasPreferredModels() {
+		// Attempt to set default models based on configuration
+		if err := cfg.SetDefaultModels(); err != nil {
+			// If we can't set defaults, consider config incomplete
+			return false
+		}
+	}
+
+	return true
 }
