@@ -183,148 +183,206 @@ export CRUSH_BASE_URL=https://your-private-cloud-endpoint.com/v1
 ./crush
 ```
 
-#### Configuration File (`~/.crush.yaml`):
-```yaml
-models:
-  large:
-    model: "Qwen2-72B-Instruct"  # or "deepseek-coder-33b", "llama3.1:70b", etc.
-    provider: "openai-compat"
-  small:
-    model: "Qwen2-7B-Instruct"   # or a smaller variant
-    provider: "openai-compat"
-
-providers:
-  openai-compat:
-    id: "openai-compat"
-    name: "Private Cloud Model Endpoint"
-    base_url: "https://your-private-cloud-endpoint.com/v1"
-    api_key: "your-api-key"  # Often required for authentication
-    type: "openai-compat"
-    models:
-      - id: "Qwen2-72B-Instruct"
-        name: "Qwen2 72B Instruct"
-        context_window: 32768
-        default_max_tokens: 2048
-        supports_images: false
-      - id: "deepseek-coder-33b"
-        name: "DeepSeek Coder 33B"
-        context_window: 16384
-        default_max_tokens: 2048
-        supports_images: false
+#### Configuration File (`~/.config/crush/crush.json`):
+```json
+{
+  "models": {
+    "large": {
+      "model": "Qwen2-72B-Instruct",
+      "provider": "openai-compat"
+    },
+    "small": {
+      "model": "Qwen2-7B-Instruct",
+      "provider": "openai-compat"
+    }
+  },
+  "providers": {
+    "openai-compat": {
+      "id": "openai-compat",
+      "name": "Private Cloud Model Endpoint",
+      "base_url": "https://your-private-cloud-endpoint.com/v1",
+      "api_key": "your-api-key",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "Qwen2-72B-Instruct",
+          "name": "Qwen2 72B Instruct",
+          "context_window": 32768,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        },
+        {
+          "id": "deepseek-coder-33b",
+          "name": "DeepSeek Coder 33B",
+          "context_window": 16384,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        }
+      ]
+    }
+  }
+}
 ```
 
 ### Specific Model Configurations
 
 #### For Qwen Models:
-```yaml
-providers:
-  qwen-private:
-    id: "qwen-private"
-    name: "Qwen Private Deployment"
-    base_url: "https://your-qwen-endpoint.company.com/v1"
-    api_key: "your-api-key"
-    type: "openai-compat"
-    models:
-      - id: "Qwen2-72B-Instruct"
-        name: "Qwen2 72B Instruct"
-        context_window: 32768
-        default_max_tokens: 2048
-        supports_images: false
-      - id: "Qwen2-7B-Instruct"
-        name: "Qwen2 7B Instruct"
-        context_window: 32768
-        default_max_tokens: 2048
-        supports_images: false
+```json
+{
+  "providers": {
+    "qwen-private": {
+      "id": "qwen-private",
+      "name": "Qwen Private Deployment",
+      "base_url": "https://your-qwen-endpoint.company.com/v1",
+      "api_key": "your-api-key",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "Qwen2-72B-Instruct",
+          "name": "Qwen2 72B Instruct",
+          "context_window": 32768,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        },
+        {
+          "id": "Qwen2-7B-Instruct",
+          "name": "Qwen2 7B Instruct",
+          "context_window": 32768,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        }
+      ]
+    }
+  }
+}
 ```
 
 #### For DeepSeek Models:
-```yaml
-providers:
-  deepseek-private:
-    id: "deepseek-private"
-    name: "DeepSeek Private Deployment"
-    base_url: "https://your-deepseek-endpoint.company.com/v1"
-    api_key: "your-api-key"
-    type: "openai-compat"
-    models:
-      - id: "deepseek-coder-33b"
-        name: "DeepSeek Coder 33B"
-        context_window: 16384
-        default_max_tokens: 2048
-        supports_images: false
-      - id: "deepseek-chat"
-        name: "DeepSeek Chat"
-        context_window: 8192
-        default_max_tokens: 2048
-        supports_images: false
+```json
+{
+  "providers": {
+    "deepseek-private": {
+      "id": "deepseek-private",
+      "name": "DeepSeek Private Deployment",
+      "base_url": "https://your-deepseek-endpoint.company.com/v1",
+      "api_key": "your-api-key",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "deepseek-coder-33b",
+          "name": "DeepSeek Coder 33B",
+          "context_window": 16384,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        },
+        {
+          "id": "deepseek-chat",
+          "name": "DeepSeek Chat",
+          "context_window": 8192,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        }
+      ]
+    }
+  }
+}
 ```
 
 ### Self-Hosted Solutions
 
 #### Using vLLM:
-```yaml
-providers:
-  vllm:
-    id: "vllm"
-    name: "vLLM Server"
-    base_url: "http://localhost:8000/v1"  # or your vLLM endpoint
-    api_key: "token-abc123"  # vLLM often accepts any non-empty string
-    type: "openai-compat"
-    models:
-      - id: "Qwen2-72B-Instruct"
-        name: "Qwen2 72B Instruct"
+```json
+{
+  "providers": {
+    "vllm": {
+      "id": "vllm",
+      "name": "vLLM Server",
+      "base_url": "http://localhost:8000/v1",
+      "api_key": "token-abc123",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "Qwen2-72B-Instruct",
+          "name": "Qwen2 72B Instruct"
+        }
+      ]
+    }
+  }
+}
 ```
 
 #### Using TGI (Text Generation Inference):
-```yaml
-providers:
-  tgi:
-    id: "tgi"
-    name: "TGI Server"
-    base_url: "http://localhost:3000/v1"  # or your TGI endpoint
-    api_key: "your-tgi-token"
-    type: "openai-compat"
-    models:
-      - id: "deepseek-coder-33b"
-        name: "DeepSeek Coder 33B"
+```json
+{
+  "providers": {
+    "tgi": {
+      "id": "tgi",
+      "name": "TGI Server",
+      "base_url": "http://localhost:3000/v1",
+      "api_key": "your-tgi-token",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "deepseek-coder-33b",
+          "name": "DeepSeek Coder 33B"
+        }
+      ]
+    }
+  }
+}
 ```
 
 #### Using LocalAI:
-```yaml
-providers:
-  localai:
-    id: "localai"
-    name: "LocalAI Server"
-    base_url: "http://localhost:8080/v1"  # or your LocalAI endpoint
-    api_key: "your-localai-token"
-    type: "openai-compat"
-    models:
-      - id: "qwen2"
-        name: "Qwen2"
+```json
+{
+  "providers": {
+    "localai": {
+      "id": "localai",
+      "name": "LocalAI Server",
+      "base_url": "http://localhost:8080/v1",
+      "api_key": "your-localai-token",
+      "type": "openai-compat",
+      "models": [
+        {
+          "id": "qwen2",
+          "name": "Qwen2"
+        }
+      ]
+    }
+  }
+}
 ```
 
 ### Authentication Headers
 
 If your private deployment requires specific authentication headers:
 
-```yaml
-providers:
-  private-model:
-    id: "private-model"
-    name: "Private Model Deployment"
-    base_url: "https://your-model-endpoint.company.com/v1"
-    api_key: "your-auth-token"
-    type: "openai-compat"
-    extra_headers:
-      Authorization: "Bearer your-jwt-token"
-      X-API-Key: "your-custom-api-key"
-      X-Company-ID: "your-company-id"
-    models:
-      - id: "Qwen2-72B-Instruct"
-        name: "Qwen2 72B Instruct"
-        context_window: 32768
-        default_max_tokens: 2048
-        supports_images: false
+```json
+{
+  "providers": {
+    "private-model": {
+      "id": "private-model",
+      "name": "Private Model Deployment",
+      "base_url": "https://your-model-endpoint.company.com/v1",
+      "api_key": "your-auth-token",
+      "type": "openai-compat",
+      "extra_headers": {
+        "Authorization": "Bearer your-jwt-token",
+        "X-API-Key": "your-custom-api-key",
+        "X-Company-ID": "your-company-id"
+      },
+      "models": [
+        {
+          "id": "Qwen2-72B-Instruct",
+          "name": "Qwen2 72B Instruct",
+          "context_window": 32768,
+          "default_max_tokens": 2048,
+          "supports_images": false
+        }
+      ]
+    }
+  }
+}
 ```
 
 ### Testing Your Configuration
